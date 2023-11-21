@@ -1655,21 +1655,32 @@ def make_jsonschema(base: Path, json_dir: Path) -> None:
     make_schema(base, json_dir)
 
 
-if __name__ == "__main__":
+def main():
     logging.basicConfig(level=logging.INFO)
 
-    base = Path.home() / "github" / "pyx12" / "pyx12" / "map"
-    output = "python"
+    import argparse
+    parser =argparse.ArgumentParser()
+    parser.add_argument('--base', default=Path.home() / "github" / "pyx12" / "pyx12" / "map", type=Path)
+    parser.add_argument('--output-base', default=Path.cwd().parent, type=Path)
+    parser.add_argument('--output-type', choices=['python', 'schema-python', 'json'], default='python')
+    args = parser.parse_args()
+    base = args.base
+    output_base = args.output_base
+    output_type = args.output_type
 
-    if output == "python":
-        x12_package = Path.cwd().parent / "x12"
+    if output_type == "python":
+        x12_package = output_base / "x12"
         make_python(AnnotatedPythonMaker(), base, x12_package)
-    elif output == "schema-python":
-        x12_package = Path.cwd().parent / "x12"
+    elif output_type == "schema-python":
+        x12_package = output_base / "x12"
         make_python(InterimPythonMaker(), base, x12_package)
-    elif output == "json":
-        json_dir = Path.cwd() / "json"
+    elif output_type == "json":
+        json_dir = output_base / "tools" / "json"
         make_jsonschema(base, json_dir)
     else:
-        raise ValueError("unknown output option, {output}")
+        raise ValueError(f"unknown output option, {output_type}")
     logging.shutdown()
+
+
+if __name__ == "__main__":
+    main()
