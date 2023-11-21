@@ -1560,13 +1560,13 @@ class PythonMaker:
                 data_element.ele_num: data_element
                 for data_element in element_reader(source)
             }
-        names = self.make_common_module(codesets, data_elements, x12_package)
+        names = self.make_common_module(codesets, data_elements, target)
 
         for source_path in sorted(base.glob("x12.control.*.xml")):
-            self.make_message_module(codesets, data_elements, source_path, x12_package)
+            self.make_message_module(codesets, data_elements, source_path, target)
 
         for source_path in sorted(base.glob("[0-9][0-9][0-9]*.xml")):
-            self.make_message_module(codesets, data_elements, source_path, x12_package)
+            self.make_message_module(codesets, data_elements, source_path, target)
 
         with (base / "maps.xml").open() as source:
             maps = list(map_reader(source))
@@ -1629,10 +1629,10 @@ def make_schema(base: Path, target: Path) -> None:
             for data_element in element_reader(source)
         }
     for source_path in sorted(base.glob("x12.control.*.xml")):
-        make_message_schema(codesets, data_elements, source_path, x12_package)
+        make_message_schema(codesets, data_elements, source_path, target)
 
     for source_path in sorted(base.glob("[0-9][0-9][0-9]*.xml")):
-        make_message_schema(codesets, data_elements, source_path, x12_package)
+        make_message_schema(codesets, data_elements, source_path, target)
 
 
 def make_python(maker: PythonMaker, base: Path, x12_package: Path) -> None:
