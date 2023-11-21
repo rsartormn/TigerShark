@@ -1659,7 +1659,7 @@ def main():
     logging.basicConfig(level=logging.INFO)
 
     import argparse
-    parser =argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
     parser.add_argument('--base', default=Path.home() / "github" / "pyx12" / "pyx12" / "map", type=Path)
     parser.add_argument('--output-base', default=Path.cwd().parent, type=Path)
     parser.add_argument('--output-type', choices=['python', 'schema-python', 'json'], default='python')
