@@ -137,12 +137,28 @@ class Source:
         self.array_sep = array_sep  # Often ":". Sometimes "^".
         self.pos: int = 0
 
+        # 1-indexed line number
+        self.line_num: int = 1
+        # 1-indexed character number on the current line
+        self.char_num: int = 1
+
+
     def consume_whitespace(self) -> None:
         """
         Moves ``self.pos`` past any leading whitespace.
         """
-        while self.pos != len(self.text) and self.text[self.pos].isspace():
-            self.pos += 1
+        while True:
+            if self.pos >= len(self.text):
+                break
+            if self.text[self.pos].isspace():
+                self.pos += 1
+                if self.text[self.pos] == '\n':
+                    self.line_num += 1
+                    self.char_num = 1
+                else:
+                    self.char_num += 1
+            else:
+                break
 
     def elements(self) -> list[str | list[str]]:
         """
@@ -184,9 +200,19 @@ class Source:
         start = self.pos
         while self.pos != len(self.text) and self.text[self.pos] != self.segment_sep:
             self.pos += 1
+            if self.text[self.pos] == '\n':
+                self.line_num += 1
+                self.char_num = 1
+            else:
+                self.char_num += 1
         # assert self.text[self.pos] == self.segment_sep
         if self.pos != len(self.text):
             self.pos += 1
+            if self.text[self.pos] == '\n':
+                self.line_num += 1
+                self.char_num = 1
+            else:
+                self.char_num += 1
         elements = self.text[start:self.pos-1].rstrip().split(self.element_sep)
         # ISA segment? Do NOT subdivide ISA16 field's value -- it would vanish into ``["", ""]``.
         # TODO: Alternative design is for ``Segment`` ISA parser can replace ISA16 ``["", ""]`` value with the parsed array_sep value.
