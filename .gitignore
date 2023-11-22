@@ -29,3 +29,6 @@ docs/build/doctrees/*.doctree
 bundled.log
 tox_env.sh
 /demo/837-bug-sample.txt
+
+.venv/
+.idea/
