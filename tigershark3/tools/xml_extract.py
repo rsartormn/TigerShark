@@ -1500,7 +1500,7 @@ class PythonMaker:
                 print("from typing import TypeAlias, Annotated")
                 print("import datetime")
                 print("from decimal import Decimal")
-                print("from x12.annotations import *")
+                print("from .annotations import *")
                 names.union(code_writer.dump_codesets())
                 names.union(code_writer.dump_data_elements())
         return names
