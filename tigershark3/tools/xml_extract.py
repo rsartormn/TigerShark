@@ -216,7 +216,7 @@ import sys
 from textwrap import indent
 from typing import (
     Union, TypeAlias, Any, TextIO,
-    Self, cast, Deque, Type
+    Self, cast, Deque, Type, Collection, Optional
 )
 from xml.etree import ElementTree as XML
 
@@ -1540,7 +1540,7 @@ class PythonMaker:
                 code_writer.visit(msg)
 
 
-    def make_python(self, base: Path, target: Path) -> None:
+    def make_python(self, base: Path, target: Path, files_to_make: Optional[Collection[str]] = None) -> None:
         """
         Extract from XML schema, creating Python.
 
@@ -1563,9 +1563,13 @@ class PythonMaker:
         names = self.make_common_module(codesets, data_elements, target)
 
         for source_path in sorted(base.glob("x12.control.*.xml")):
+            if files_to_make and str(source_path) not in files_to_make:
+                continue
             self.make_message_module(codesets, data_elements, source_path, target)
 
         for source_path in sorted(base.glob("[0-9][0-9][0-9]*.xml")):
+            if files_to_make and str(source_path) not in files_to_make:
+                continue
             self.make_message_module(codesets, data_elements, source_path, target)
 
         with (base / "maps.xml").open() as source:
@@ -1635,7 +1639,12 @@ def make_schema(base: Path, target: Path) -> None:
         make_message_schema(codesets, data_elements, source_path, target)
 
 
-def make_python(maker: PythonMaker, base: Path, x12_package: Path) -> None:
+def make_python(
+        maker: PythonMaker,
+        base: Path,
+        x12_package: Path,
+        files_to_make: Optional[Collection[str]] = None
+) -> None:
     """
     Extract from XML schema and make Python modules for parsing messages.
     """
@@ -1643,7 +1652,7 @@ def make_python(maker: PythonMaker, base: Path, x12_package: Path) -> None:
     logger.info("Creating %s", x12_package)
     # maker = InterimPythonMaker()
     # maker = AnnotatedPythonMaker()
-    maker.make_python(base, x12_package)
+    maker.make_python(base, x12_package, files_to_make=files_to_make)
 
 def make_jsonschema(base: Path, json_dir: Path) -> None:
     """
@@ -1663,17 +1672,19 @@ def main():
     parser.add_argument('--base', default=Path.home() / "github" / "pyx12" / "pyx12" / "map", type=Path)
     parser.add_argument('--output-base', default=Path.cwd().parent, type=Path)
     parser.add_argument('--output-type', choices=['python', 'schema-python', 'json'], default='python')
+    parser.add_argument('--make', action='append')
     args = parser.parse_args()
     base = args.base
     output_base = args.output_base
     output_type = args.output_type
+    files_to_make = args.make or []
 
     if output_type == "python":
         x12_package = output_base / "x12"
-        make_python(AnnotatedPythonMaker(), base, x12_package)
+        make_python(AnnotatedPythonMaker(), base, x12_package, files_to_make=files_to_make)
     elif output_type == "schema-python":
         x12_package = output_base / "x12"
-        make_python(InterimPythonMaker(), base, x12_package)
+        make_python(InterimPythonMaker(), base, x12_package, files_to_make=files_to_make)
     elif output_type == "json":
         json_dir = output_base / "tools" / "json"
         make_jsonschema(base, json_dir)
