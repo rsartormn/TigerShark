@@ -7,7 +7,7 @@ import logging
 from pathlib import Path
 import sys
 
-from x12.base import Source, Message
+from x12.base import Source, Message, X12Parser
 # from x12 import msg_834_5010_X220_A1
 import x12
 
@@ -21,6 +21,10 @@ def get_options(argv: list[str]) -> argparse.Namespace:
     parser.add_argument("--package", "-p", type=str, default="x12", help="Python package with message modules")
     parser.add_argument("--message", "-m", type=str, default="msg_834_5010_X220_A1.MSG834A1", help="message module.class")
     parser.add_argument("--separators", "-s", type=str, default="", help="separators when parsing compressed ISA segments, for example '*:~'")
+    parser.add_argument('--data-element-separator')
+    parser.add_argument('--component-element-separator')
+    parser.add_argument('--repetition-separator')
+    parser.add_argument('--segment-terminator')
     parser.add_argument("--debug", "-d", dest="log_level", action='store_const', const=logging.DEBUG, default=logging.INFO)
     options = parser.parse_args(argv)
     module_name, _, cls_name = options.message.partition(".")
@@ -32,6 +36,10 @@ def get_options(argv: list[str]) -> argparse.Namespace:
     if options.separators:
         try:
             options.element_sep, _, options.segment_sep = options.separators
+            options.data_element_separator = options.separators[0]
+            options.component_element_separator = options.separators[1]
+            options.repetition_separator = options.separators[2]
+            options.segment_terminator = options.separators[3]
         except ValueError as ex:
             parser.error(f"separators must be three characters, for example '*:~'")
     else:
@@ -61,12 +69,21 @@ def exchange_to_segments(source: Path, message_class: type[Message], element_sep
     else:
         logger.error("No message parsed from %s as %r", source, message_class)
 
-def exchange_to_json(source: Path, message_class: type[Message], element_sep: str = "", segment_sep: str = "") -> None:
+def exchange_to_json(
+        source: Path,
+        message_class: type[Message],
+        element_sep: str,
+        component_element_separator: str,
+        segment_sep: str,
+        repetition_separator: str
+) -> None:
     """
     TODO: Output is "json" format.
     """
-    document = Source(source.read_text(), element_sep=element_sep, segment_sep=segment_sep)
-    msg = message_class.parse(document)
+    document = Source(source.read_text(), element_sep=element_sep, segment_sep=segment_sep,
+                      array_sep=repetition_separator)
+    parser = X12Parser(message_class)
+    msg = parser.parse(document)
     print(msg.json())
 
 def main(argv: list[str] = sys.argv[1:]) -> None:
@@ -82,7 +99,13 @@ def main(argv: list[str] = sys.argv[1:]) -> None:
     elif options.format == "python":
         exchange_to_python(options.source[0], options.message_class, options.element_sep, options.segment_sep)
     elif options.format == "json":
-        exchange_to_json(options.source[0], options.message_class, options.element_sep, options.segment_sep)
+        exchange_to_json(
+            options.source[0],
+            options.message_class,
+            element_sep=options.data_element_separator,
+            component_element_separator=options.component_element_separator,
+            repetition_separator=options.repetition_separator,
+            segment_sep=options.segment_terminator)
     else:
         raise NotImplementedError(f"unsupporeted {options.format}")
 
