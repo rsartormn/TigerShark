@@ -1381,7 +1381,9 @@ class X12Parser:
                 # COMPOSITE-LIKE PROCESSING for elements that are list[Element]
                 repeating_type = get_args(field_type)[0]
                 self.logger.debug("  list[%s]", repeating_type.__name__)
-                source_array = cast(list[str], source_values.pop(0))
+                source_array = []
+                if source_values:
+                    source_array = cast(list[str], source_values.pop(0))
                 values = [self.segment_attr_build(cls, name, repeating_type, [item]) for item in source_array]
                 return values
             case type() if issubclass(field_type, Composite):
