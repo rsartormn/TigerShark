@@ -152,7 +152,7 @@ class Source:
                 break
             if self.text[self.pos].isspace():
                 self.pos += 1
-                if self.text[self.pos] == '\n':
+                if self.pos < len(self.text) and self.text[self.pos] == '\n':
                     self.line_num += 1
                     self.char_num = 1
                 else:
