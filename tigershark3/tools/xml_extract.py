@@ -1535,8 +1535,8 @@ class PythonMaker:
                 print(f"Created {datetime.datetime.now()}")
                 # print(msg)
                 print('"""')
-                print("from .base import *")
-                print("from .common import *")
+                print("from tigershark3.x12.base import *")
+                print("from tigershark3.x12.common import *")
                 code_writer.visit(msg)
 
 
