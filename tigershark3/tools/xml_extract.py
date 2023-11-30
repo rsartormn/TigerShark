@@ -1415,7 +1415,10 @@ class EmitPython_Annotated(MessageVisitor):
                 # if elt.attr_name not in composite.required:
                 #     name, _, annotation = annotation.partition(":")
                 #     annotation = f"{name}: Union[{annotation}, None]"
-                print(f"    {alias}")
+                if alias:
+                    print(f"    {alias}")
+                else:
+                    print('')
                 print(f"    {annotation}")
         else:
             print("    pass")
@@ -1434,7 +1437,10 @@ class EmitPython_Annotated(MessageVisitor):
                 # if elt.attr_name not in segment.required:
                 #     name, _, annotation = annotation.partition(":")
                 #     annotation = f"{name}: Union[{annotation}, None]"
-                print(f"    {alias}")
+                if alias:
+                    print(f"    {alias}")
+                else:
+                    print('')
                 print(f"    {annotation}")
         else:
             print("    pass")
@@ -1452,7 +1458,10 @@ class EmitPython_Annotated(MessageVisitor):
                 # if elt.attr_name not in loop.required:
                 #     name, _, annotation = annotation.partition(":")
                 #     annotation = f"{name}: Union[{annotation}, None]"
-                print(f"    {alias}")
+                if alias:
+                    print(f"    {alias}")
+                else:
+                    print('')
                 print(f"    {annotation}")
         else:
             print("    pass")
@@ -1468,7 +1477,10 @@ class EmitPython_Annotated(MessageVisitor):
             # if elt.attr_name not in message.required:
             #     name, _, annotation = annotation.partition(":")
             #     annotation = f"{name}: Union[{annotation}, None]"
-            print(f"    {alias}")
+            if alias:
+                print(f"    {alias}")
+            else:
+                print('')
             print(f"    {annotation}")
 
 class PythonMaker:
