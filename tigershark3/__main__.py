@@ -143,5 +143,6 @@ if __name__ == "__main__":
     message_class = "msg_278_4010_X094_A1.MSG278"
 
     # Command-line.
-    main(["-d", "-m", message_class, "-f", "json"] + message_options + [str(message_path)])
+    # E.g.: main(["-d", "-m", message_class, "-f", "json"] + message_options + [str(message_path)])
+    main()
     logging.shutdown()
