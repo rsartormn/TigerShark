@@ -302,9 +302,6 @@ class X12ElementHelper:
 
     @staticmethod
     def _time(source: str, format: str) -> Any:
-        # TODO: in "HHMMSSDD", what does "DD" mean?
-        if len(source) > 6:
-            source = source[:6]
         return datetime.datetime.strptime(source, format).time()
 
     @classmethod
