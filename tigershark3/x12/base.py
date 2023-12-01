@@ -1381,6 +1381,8 @@ class X12Parser:
                 source_array = []
                 if source_values:
                     source_array = cast(list[str], source_values.pop(0))
+                    if not isinstance(source_array, list|tuple):
+                        source_array = [source_array]
                 values = [self.segment_attr_build(cls, name, repeating_type, [item]) for item in source_array]
                 return values
             case type() if issubclass(field_type, Composite):
