@@ -200,7 +200,7 @@ class Source:
         start = self.pos
         while self.pos != len(self.text) and self.text[self.pos] != self.segment_sep:
             self.pos += 1
-            if self.text[self.pos] == '\n':
+            if self.pos < len(self.text) and self.text[self.pos] == '\n':
                 self.line_num += 1
                 self.char_num = 1
             else:
@@ -208,7 +208,7 @@ class Source:
         # assert self.text[self.pos] == self.segment_sep
         if self.pos != len(self.text):
             self.pos += 1
-            if self.text[self.pos] == '\n':
+            if self.pos < len(self.text) and self.text[self.pos] == '\n':
                 self.line_num += 1
                 self.char_num = 1
             else:
