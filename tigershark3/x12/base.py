@@ -123,14 +123,6 @@ class Source:
         """
         self.text = text
 
-        self.reset(
-            element_sep,  # Often "|", might be "*".
-            segment_sep,  # Often "~".
-            # The Component_Separator is the value of ISA16. It is not, generally, set in advance.
-            array_sep  # Often ":". Sometimes "^".
-        )
-
-    def reset(self,element_sep: str, segment_sep: str , array_sep: str ) -> None:
         self.element_sep = element_sep  # Often "|", might be "*".
         self.segment_sep = segment_sep  # Often "~".
         # The Component_Separator is the value of ISA16. It is not, generally, set in advance.
