@@ -1551,8 +1551,14 @@ class PythonMaker:
                 print("from tigershark3.x12.common import *")
                 code_writer.visit(msg)
 
-
-    def make_python(self, base: Path, target: Path, files_to_make: Optional[Collection[str]] = None) -> None:
+    def make_python(
+            self,
+            source: Path,
+            dest: Path,
+            base: Path,
+            codes_path: Optional[Path] = None,
+            dataele_path: Optional[Path] = None,
+    ) -> None:
         """
         Extract from XML schema, creating Python.
 
@@ -1560,32 +1566,43 @@ class PythonMaker:
 
         Depends on EmitPython_Interim
         """
-        with (base / "codes.xml").open() as source:
-            logger.info("Reading %s", source.name)
+
+        if not codes_path:
+            codes_path = base
+        if codes_path.is_dir():
+            codes_path = codes_path / "codes.xml"
+        if not dataele_path:
+            dataele_path = base
+        if dataele_path.is_dir():
+            dataele_path = dataele_path / "dataele.xml"
+
+        with codes_path.open() as _source:
+            logger.info("Reading %s", _source.name)
             codesets = {
                 codeset.id: codeset
-                for codeset in code_reader(source)
+                for codeset in code_reader(_source)
             }
-        with (base / "dataele.xml").open() as source:
-            logger.info("Reading %s", source.name)
+        with dataele_path.open() as _source:
+            logger.info("Reading %s", _source.name)
             data_elements = {
                 data_element.ele_num: data_element
-                for data_element in element_reader(source)
+                for data_element in element_reader(_source)
             }
-        names = self.make_common_module(codesets, data_elements, target)
+        # names = self.make_common_module(codesets, data_elements, dest)
 
-        for source_path in sorted(base.glob("x12.control.*.xml")):
-            if files_to_make and str(source_path) not in files_to_make:
-                continue
-            self.make_message_module(codesets, data_elements, source_path, target)
+        # for source_path in sorted(base.glob("x12.control.*.xml")):
+        #     if files_to_make and str(source_path) not in files_to_make:
+        #         continue
+        #     self.make_message_module(codesets, data_elements, source_path, target)
+        #
+        # for source_path in sorted(base.glob("[0-9][0-9][0-9]*.xml")):
+        #     if files_to_make and str(source_path) not in files_to_make:
+        #         continue
+        #     self.make_message_module(codesets, data_elements, source_path, target)
+        self.make_message_module(codesets, data_elements, source, dest)
 
-        for source_path in sorted(base.glob("[0-9][0-9][0-9]*.xml")):
-            if files_to_make and str(source_path) not in files_to_make:
-                continue
-            self.make_message_module(codesets, data_elements, source_path, target)
-
-        with (base / "maps.xml").open() as source:
-            maps = list(map_reader(source))
+        with (base / "maps.xml").open() as _source:
+            maps = list(map_reader(_source))
 
         # TODO: Emit the mapping objects.
         # self.make_mapper(maps, message_modules)
@@ -1653,18 +1670,20 @@ def make_schema(base: Path, target: Path) -> None:
 
 def make_python(
         maker: PythonMaker,
+        source: Path,
+        dest: Path,
         base: Path,
-        x12_package: Path,
-        files_to_make: Optional[Collection[str]] = None
 ) -> None:
     """
     Extract from XML schema and make Python modules for parsing messages.
     """
-    logger.info("Source %s", base)
-    logger.info("Creating %s", x12_package)
+    logger.info("Source %s", source)
+    logger.info("Dest %s", dest)
+    logger.info("Base %s", base)
     # maker = InterimPythonMaker()
     # maker = AnnotatedPythonMaker()
-    maker.make_python(base, x12_package, files_to_make=files_to_make)
+    maker.make_python(source, dest, base)
+
 
 def make_jsonschema(base: Path, json_dir: Path) -> None:
     """
@@ -1681,22 +1700,20 @@ def main():
 
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--base', default=Path.home() / "github" / "pyx12" / "pyx12" / "map", type=Path)
-    parser.add_argument('--output-base', default=Path.cwd().parent, type=Path)
+    parser.add_argument('--base', default=Path.cwd(), type=Path)
     parser.add_argument('--output-type', choices=['python', 'schema-python', 'json'], default='python')
-    parser.add_argument('--make', action='append')
+    parser.add_argument('source', type=Path)
+    parser.add_argument('dest', default=Path.cwd(), type=Path)
     args = parser.parse_args()
     base = args.base
-    output_base = args.output_base
     output_type = args.output_type
-    files_to_make = args.make or []
+    source = args.source
+    dest = args.dest
 
     if output_type == "python":
-        x12_package = output_base / "x12"
-        make_python(AnnotatedPythonMaker(), base, x12_package, files_to_make=files_to_make)
+        make_python(AnnotatedPythonMaker(), source, dest, base)
     elif output_type == "schema-python":
-        x12_package = output_base / "x12"
-        make_python(InterimPythonMaker(), base, x12_package, files_to_make=files_to_make)
+        make_python(InterimPythonMaker(), source, dest, base)
     elif output_type == "json":
         json_dir = output_base / "tools" / "json"
         make_jsonschema(base, json_dir)
