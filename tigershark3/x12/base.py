@@ -112,7 +112,14 @@ class Source:
     """
     logger = logging.getLogger("x12.base.Source")  #: Logger for this class
 
-    def __init__(self, text: str, element_sep: str = "", segment_sep: str = "", array_sep: str = "") -> None:
+    def __init__(
+            self,
+            text: str,
+            element_sep: str = "",
+            segment_sep: str = "",
+            array_sep: str = "",
+            repetition_sep: str = "",
+    ) -> None:
         """
         Build a Source to be used for parsing a message.
 
@@ -120,6 +127,7 @@ class Source:
         :param element_sep: Optional element separator character. This can be deduced by parsing the ISA segment.
         :param segment_sep: Optional segment separator character. This can be deduced by parsing the ISA segment.
         :param array_sep: Optional component separator character. This is generally found in the ISA16 element of the ISA segment.
+        :param repetition_sep: Optional repetition separator character. This is generally found in the ISA11 element of the ISA segment.
         """
         self.text = text
 
@@ -127,6 +135,7 @@ class Source:
         self.segment_sep = segment_sep  # Often "~".
         # The Component_Separator is the value of ISA16. It is not, generally, set in advance.
         self.array_sep = array_sep  # Often ":". Sometimes "^".
+        self.repetition_sep = repetition_sep
         self.pos: int = 0
 
         # 1-indexed line number
@@ -134,6 +143,22 @@ class Source:
         # 1-indexed character number on the current line
         self.char_num: int = 1
 
+    @classmethod
+    def from_text_with_auto_separators(cls, text: str):
+        if len(text) < 106:
+            raise ValueError(
+                'File contents not long enough to include full ISA segment')
+        element_separator = text[3]
+        repetition_sep = text[82]
+        composite_sep = text[104]
+        segment_sep = text[105]
+        document = cls(
+            text,
+            element_sep=element_separator,
+            segment_sep=segment_sep,
+            array_sep=composite_sep,
+            repetition_sep=repetition_sep)
+        return document
 
     def consume_whitespace(self) -> None:
         """
