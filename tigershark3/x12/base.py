@@ -321,6 +321,14 @@ class X12ElementHelper:
 
     @staticmethod
     def _time(source: str, format: str) -> Any:
+        if '%D' in format:
+            whole = source[:6]
+            fractional = source[6:]
+            format2 = format.replace('%D', '')
+            time1 = datetime.datetime.strptime(whole, format2)
+            subseconds = float(fractional) / 100
+            time2 = time1 + datetime.timedelta(milliseconds=subseconds * 1000)
+            return time2.time()
         return datetime.datetime.strptime(source, format).time()
 
     @classmethod
@@ -366,7 +374,7 @@ class X12ElementHelper:
             return X12ElementHelper(
                 cast(Conversion, cls._time),
                 *aspects,
-                parse_formats=["%H%M", "%H%M%S", ],
+                parse_formats=["%H%M", "%H%M%S", '%H%M%S%D'],
                 formatter=cls.dttm_fmt
             )
         else:
