@@ -237,7 +237,7 @@ class Source:
             return cast(list[str | list[str]], elements)
         return [
             val.split(self.array_sep) if self.array_sep in val else
-            val.split(self.repitition_sep) if self.repetition_sep is val else
+            val.split(self.repetition_sep) if self.repetition_sep in val else
             val
             for val in elements
         ]
