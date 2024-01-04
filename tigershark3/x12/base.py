@@ -232,7 +232,7 @@ class Source:
                 self.char_num = 1
             else:
                 self.char_num += 1
-        elements = self.text[start:self.pos-1].rstrip().split(self.element_sep)
+        elements = self.text[start:self.pos-1].split(self.element_sep)
         # ISA segment? Do NOT subdivide ISA16 field's value -- it would vanish into ``["", ""]``.
         # TODO: Alternative design is for ``Segment`` ISA parser can replace ISA16 ``["", ""]`` value with the parsed array_sep value.
         if elements[0].upper() == "ISA":
