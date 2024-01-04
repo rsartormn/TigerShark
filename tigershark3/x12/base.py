@@ -148,6 +148,8 @@ class Source:
         if len(text) < 106:
             raise ValueError(
                 'File contents not long enough to include full ISA segment')
+        if not text.startswith('ISA'):
+            raise ValueError('File does not begin with ISA segment')
         element_separator = text[3]
         repetition_sep = text[82]
         composite_sep = text[104]
